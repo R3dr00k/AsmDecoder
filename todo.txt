@@ -1,0 +1,4 @@
+Table
+    1) add format (down bar, num for line/col)
+    2) truncate and move screen
+    3) save to a file format
