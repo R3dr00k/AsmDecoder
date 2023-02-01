@@ -59,7 +59,7 @@ macro_rules! failed {
     };
 }
 
-pub fn die<T: Error>(e: T) {
+pub fn die<T: Error>(e: T) -> ! {
     print!("{}", termion::clear::All);
     panic!("{}", e);
 }

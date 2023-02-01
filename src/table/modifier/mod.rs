@@ -15,6 +15,8 @@ use screen::*;
 mod types;
 use types::*;
 
+use super::Table;
+
 pub struct TableModifier {
     table: Vec<u8>, // table
     size: TableInfo,
@@ -31,7 +33,7 @@ impl TableModifier {
         line: u16,
         posx: u16,
         posy: u16,
-    ) -> Result<Self, Box<dyn Error>> {
+    ) -> Result<Self, io::Error> {
         let table = vec![0; (cell_size as u16 * col * line) as usize];
         let terminal = Terminal::default().expect("Failed to init terminal");
         let screen = ScreenBuf::init(&terminal);
@@ -45,7 +47,20 @@ impl TableModifier {
         })
     }
 
-    pub fn run(&mut self) -> Result<(), io::Error> {
+    pub fn from_table(table: Table) -> Result<Self, io::Error> {
+        let terminal = Terminal::default().expect("Failed to init terminal");
+        let screen = ScreenBuf::init(&terminal);
+        Ok(Self {
+            table: table.table,
+            size: TableInfo::new(table.cols, table.lines, table.cell_size, 5, 5),
+            quit: false,
+            cursor: Position::new(6 + table.cell_size as u16 * 2, 7),
+            terminal,
+            screen,
+        })
+    }
+
+    pub fn run(mut self) -> Result<Table, io::Error> {
         let _stdout = stdout().into_raw_mode().unwrap();
         self.set_table();
         loop {
@@ -68,7 +83,12 @@ impl TableModifier {
                 die(error);
             }
         }
-        Ok(())
+        Ok(Table {
+            table: self.table,
+            cell_size: self.size.cell_size,
+            cols: self.size.column,
+            lines: self.size.lines,
+        })
     }
 
     fn proccess_keypress(&mut self) -> Result<(), io::Error> {
@@ -252,7 +272,7 @@ impl TableModifier {
     }
 }
 
-fn read_key() -> Result<Key, io::Error> {
+pub fn read_key() -> Result<Key, io::Error> {
     loop {
         if let Some(key) = io::stdin().lock().keys().next() {
             return key;
