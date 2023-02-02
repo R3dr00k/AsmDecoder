@@ -17,6 +17,7 @@ pub struct Table {
     cell_size: u8,
     cols: u16,
     lines: u16,
+    //names: Vec<String>, // list of names
 }
 
 pub struct Tables {

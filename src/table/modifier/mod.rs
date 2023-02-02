@@ -16,6 +16,7 @@ mod types;
 use types::*;
 
 use super::Table;
+use termion::color;
 
 pub struct TableModifier {
     table: Vec<u8>, // table
